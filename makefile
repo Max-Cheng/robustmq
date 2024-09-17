@@ -25,3 +25,6 @@ test:
 clean:
 	cargo clean
 	rm -rf build
+
+image:
+	docker build --target placement-center -t placement-center . && docker build --target broker-mqtt -t broker-mqtt .

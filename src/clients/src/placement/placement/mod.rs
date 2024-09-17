@@ -18,6 +18,7 @@ use inner::{
 use mobc::Manager;
 use protocol::placement_center::generate::placement::placement_center_service_client::PlacementCenterServiceClient;
 use std::sync::Arc;
+use tonic::codegen::http;
 use tonic::transport::Channel;
 
 use crate::poll::ClientPool;
@@ -130,18 +131,15 @@ impl Manager for PlacementServiceManager {
     type Error = CommonError;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {
-        match PlacementCenterServiceClient::connect(format!("http://{}", self.addr.clone())).await {
-            Ok(client) => {
-                return Ok(client);
-            }
-            Err(err) => {
-                return Err(CommonError::CommmonError(format!(
-                    "manager connect error:{},{}",
-                    err.to_string(),
-                    self.addr.clone()
-                )))
-            }
-        };
+        let uri = format!("http://{}", self.addr.clone());
+        match PlacementCenterServiceClient::connect(uri.clone()).await {
+            Ok(client) => Ok(client),
+            Err(err) => Err(CommonError::CommmonError(format!(
+                "Manager connect error: {}, Address: {}",
+                err,
+                uri
+            )))
+        }
     }
 
     async fn check(&self, conn: Self::Connection) -> Result<Self::Connection, Self::Error> {

@@ -1,0 +1,42 @@
+services:
+  placement-center:
+    image: placement-center:latest
+    expose:
+      - "1228/tcp"
+      - "1228/udp"
+      - "1227/tcp"
+      - "1227/udp"
+    volumes:
+      - ./config/placement-center/node.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    container_name: placement-center
+    networks:
+      - robustmq-network
+
+  broker-mqtt:
+    image: broker-mqtt:latest
+    ports:
+      - "1885:1883/tcp"
+      - "1885:1883/udp"
+    expose:
+      - "9981"
+      - "9981/udp"
+      - "9982"
+      - "9982/udp"
+    volumes:
+      - ./config/mqtt-broker/node.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    depends_on:
+      - placement-center
+    container_name: broker-mqtt
+    networks:
+      - robustmq-network
+
+networks:
+  robustmq-network:
+    driver: bridge
+
+volumes:
+  config:

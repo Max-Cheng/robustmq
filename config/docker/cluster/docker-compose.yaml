@@ -1,0 +1,118 @@
+services:
+  placement-center-1:
+    image: placement-center:latest
+    expose:
+      - "1228/tcp"
+      - "1228/udp"
+      - "1227/tcp"
+      - "1227/udp"
+    volumes:
+      - ./config/placement-center/node-1.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    container_name: placement-center-1
+    networks:
+      - robustmq-network
+
+  placement-center-2:
+    image: placement-center:latest
+    expose:
+      - "1228/tcp"
+      - "1228/udp"
+      - "1227/tcp"
+      - "1227/udp"
+    volumes:
+      - ./config/placement-center/node-2.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    container_name: placement-center-2
+    networks:
+      - robustmq-network
+
+  placement-center-3:
+    image: placement-center:latest
+    expose:
+      - "1228/tcp"
+      - "1228/udp"
+      - "1227/tcp"
+      - "1227/udp"
+    volumes:
+      - ./config/placement-center/node-3.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    container_name: placement-center-3
+    networks:
+      - robustmq-network
+
+  broker-mqtt-1:
+    image: broker-mqtt:latest
+    expose:
+      - "9981/tcp"
+      - "9981/udp"
+      - "9982/tcp"
+      - "9982/udp"
+    ports:
+      - "1883:1883/tcp"
+      - "1883:1883/udp"
+    volumes:
+      - ./config/mqtt-broker/node-1.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    depends_on:
+      - placement-center-1
+      - placement-center-2
+      - placement-center-3
+    container_name: broker-mqtt-1
+    networks:
+      - robustmq-network
+
+  broker-mqtt-2:
+    image: broker-mqtt:latest
+    ports:
+      - "1884:1883/tcp"
+      - "1884:1883/udp"
+    expose:
+      - "9981:9981/tcp"
+      - "9981:9981/udp"
+      - "9982:9982/tcp"
+      - "9982:9982/udp"
+    volumes:
+      - ./config/mqtt-broker/node-2.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    depends_on:
+      - placement-center-1
+      - placement-center-2
+      - placement-center-3
+    container_name: broker-mqtt-2
+    networks:
+      - robustmq-network
+
+  broker-mqtt-3:
+    image: broker-mqtt:latest
+    ports:
+      - "1885:1883/tcp"
+      - "1885:1883/udp"
+    expose:
+      - "9981"
+      - "9981/udp"
+      - "9982"
+      - "9982/udp"
+    volumes:
+      - ./config/mqtt-broker/node-3.toml:/robustmq/config/node.toml
+      - ./certs/:/robustmq/config/certs/
+      - ./log4rs.yaml:/robustmq/config/./log4rs.yaml
+    depends_on:
+      - placement-center-1
+      - placement-center-2
+      - placement-center-3
+    container_name: broker-mqtt-3
+    networks:
+      - robustmq-network
+
+networks:
+  robustmq-network:
+    driver: bridge
+
+volumes:
+  config:
